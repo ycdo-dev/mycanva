@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Discovery Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 60px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        p {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1em;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-weight: 600;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .link-button {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.95em;
+            margin-top: 15px;
+            text-decoration: underline;
+        }
+
+        .link-button:hover {
+            color: #764ba2;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .modal-text {
+            color: #666;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        .error-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .success-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .success-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+
+        .success-link:hover {
+            transform: translateY(-2px);
+        }
+
+        .close-btn {
+            margin-top: 20px;
+            background: #e0e0e0;
+            color: #666;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #d0d0d0;
+        }
+
+        .attempt-counter {
+            margin-top: 10px;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9em;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+
+        .user-info {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            color: #666;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <button id="logoutBtn" class="logout-btn hidden" onclick="logout()">Logout</button>
+
+    <!-- Login Form -->
+    <div id="loginContainer" class="container">
+        <h1>🚀 AI Discovery</h1>
+        <p>Sign in to discover amazing AI-powered content!</p>
+        
+        <div class="input-group">
+            <input type="email" id="loginEmail" placeholder="Email address" required>
+        </div>
+        
+        <div class="input-group">
+            <input type="password" id="loginPassword" placeholder="Password" required>
+        </div>
+
+        <div class="error-message" id="loginError"></div>
+        
+        <button class="btn" onclick="signIn()">Sign In</button>
+        <button class="link-button" onclick="showSignUp()">Don't have an account? Sign Up</button>
+    </div>
+
+    <!-- Sign Up Form -->
+    <div id="signupContainer" class="container hidden">
+        <h1>🚀 Create Account</h1>
+        <p>Join AI Discovery today!</p>
+        
+        <div class="input-group">
+            <input type="email" id="signupEmail" placeholder="Email address" required>
+        </div>
+        
+        <div class="input-group">
+            <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" required>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="signupPasswordConfirm" placeholder="Confirm password" required>
+        </div>
+
+        <div class="error-message" id="signupError"></div>
+        
+        <button class="btn" onclick="signUp()">Create Account</button>
+        <button class="link-button" onclick="showSignIn()">Already have an account? Sign In</button>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainContainer" class="container hidden">
+        <h1>🚀 AI Discovery</h1>
+        <p>Let our AI discover something amazing for you!</p>
+        
+        <div class="user-info" id="userInfo"></div>
+        
+        <button class="btn" onclick="startSearch()">Find Out</button>
+    </div>
+
+    <!-- Modal Dialog -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // TODO: Replace with your Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiQBoCGfzekfjSoWMj0SKNpjRrt-1A5vg",
+            authDomain: "payment-gateway-b726e.firebaseapp.com",
+            projectId: "payment-gateway-b726e",
+            storageBucket: "payment-gateway-b726e.firebasestorage.app",
+            messagingSenderId: "437943411570",
+            appId: "1:437943411570:web:717ea94bed7e32563073eb"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let userIP = null;
+
+        // Get user's IP address
+        async function getUserIP() {
+            const ipServices = [
+                'https://api.ipify.org?format=json',
+                'https://api64.ipify.org?format=json',
+            ];
+
+            for (let service of ipServices) {
+                try {
+                    const response = await fetch(service, { timeout: 5000 });
+                    const data = await response.json();
+                    userIP = data.ip || data.IP;
+                    if (userIP) return;
+                } catch (error) {
+                    console.log('Failed to get IP from', service);
+                }
+            }
+            
+            userIP = generateBrowserFingerprint();
+        }
+
+        function generateBrowserFingerprint() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = 'top';
+            ctx.font = '14px Arial';
+            ctx.fillText('Browser fingerprint', 2, 2);
+            
+            const fingerprint = canvas.toDataURL() + 
+                               navigator.userAgent + 
+                               navigator.language + 
+                               screen.colorDepth;
+            
+            let hash = 0;
+            for (let i = 0; i < fingerprint.length; i++) {
+                const char = fingerprint.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            
+            return 'fp_' + Math.abs(hash).toString(36);
+        }
+
+        // Auth state observer
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await showMainApp();
+            } else {
+                showLoginForm();
+            }
+        });
+
+        async function showMainApp() {
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('signupContainer').classList.add('hidden');
+            document.getElementById('mainContainer').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            
+            document.getElementById('userInfo').innerHTML = `
+                Logged in as: <strong>${currentUser.email}</strong>
+            `;
+
+            // Initialize user document if it doesn't exist
+            await initializeUserDocument();
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginContainer').classList.remove('hidden');
+            document.getElementById('signupContainer').classList.add('hidden');
+            document.getElementById('mainContainer').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+        }
+
+        function showSignUp() {
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('signupContainer').classList.remove('hidden');
+        }
+
+        function showSignIn() {
+            document.getElementById('signupContainer').classList.add('hidden');
+            document.getElementById('loginContainer').classList.remove('hidden');
+        }
+
+        async function initializeUserDocument() {
+            const userRef = doc(db, 'users', currentUser.uid);
+            const userDoc = await getDoc(userRef);
+
+            if (!userDoc.exists()) {
+                await setDoc(userRef, {
+                    email: currentUser.email,
+                    attemptCount: 0,
+                    requiredAttempts: Math.floor(Math.random() * 3) + 3,
+                    hasSucceeded: false,
+                    ipAddress: userIP,
+                    createdAt: serverTimestamp(),
+                    lastAttempt: null
+                });
+            }
+        }
+
+        async function signUp() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+            const errorDiv = document.getElementById('signupError');
+
+            errorDiv.textContent = '';
+
+            if (!email || !password || !passwordConfirm) {
+                errorDiv.textContent = 'Please fill in all fields';
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                errorDiv.textContent = 'Passwords do not match';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters';
+                return;
+            }
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                errorDiv.textContent = getErrorMessage(error.code);
+            }
+        }
+
+        async function signIn() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+
+            errorDiv.textContent = '';
+
+            if (!email || !password) {
+                errorDiv.textContent = 'Please fill in all fields';
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                errorDiv.textContent = getErrorMessage(error.code);
+            }
+        }
+
+        async function logout() {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        async function startSearch() {
+            if (!currentUser) return;
+
+            const userRef = doc(db, 'users', currentUser.uid);
+            const userDoc = await getDoc(userRef);
+            const userData = userDoc.data();
+
+            // Check if user has already succeeded
+            if (userData.hasSucceeded) {
+                showModal('already-completed');
+                return;
+            }
+
+            showModal('searching');
+
+            // Increment attempt count
+            const newAttemptCount = userData.attemptCount + 1;
+            await updateDoc(userRef, {
+                attemptCount: newAttemptCount,
+                lastAttempt: serverTimestamp()
+            });
+
+            // Simulate AI searching
+            setTimeout(async () => {
+                if (newAttemptCount >= userData.requiredAttempts) {
+                    await updateDoc(userRef, {
+                        hasSucceeded: true
+                    });
+                    showModal('success');
+                } else {
+                    showModal('failed', newAttemptCount, userData.requiredAttempts);
+                }
+            }, 3000);
+        }
+
+        function showModal(type, attemptCount = 0, requiredAttempts = 0) {
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modalBody');
+            
+            modal.style.display = 'block';
+
+            if (type === 'searching') {
+                modalBody.innerHTML = `
+                    <div class="loader"></div>
+                    <div class="modal-title">The AI is searching...</div>
+                    <div class="modal-text">Please wait while we process your request</div>
+                `;
+            } else if (type === 'failed') {
+                modalBody.innerHTML = `
+                    <div class="error-icon">❌</div>
+                    <div class="modal-title">Failed</div>
+                    <div class="modal-text">Please try again</div>
+                    <div class="attempt-counter">Attempt ${attemptCount} of ${requiredAttempts}</div>
+                    <button class="close-btn" onclick="closeModal()">Try Again</button>
+                `;
+            } else if (type === 'success') {
+                modalBody.innerHTML = `
+                    <div class="success-icon">✨</div>
+                    <div class="modal-title">Success!</div>
+                    <div class="modal-text">We found something amazing for you!</div>
+                    <a href="https://web3kh.today" target="_blank" class="success-link">Visit Now</a>
+                    <button class="close-btn" onclick="closeModal()">Close</button>
+                `;
+            } else if (type === 'already-completed') {
+                modalBody.innerHTML = `
+                    <div class="success-icon">✅</div>
+                    <div class="modal-title">Already Completed</div>
+                    <div class="modal-text">You have already successfully completed the discovery!</div>
+                    <a href="https://web3kh.today" target="_blank" class="success-link">Visit Again</a>
+                    <button class="close-btn" onclick="closeModal()">Close</button>
+                `;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function getErrorMessage(errorCode) {
+            switch (errorCode) {
+                case 'auth/email-already-in-use':
+                    return 'This email is already registered';
+                case 'auth/invalid-email':
+                    return 'Invalid email address';
+                case 'auth/operation-not-allowed':
+                    return 'Operation not allowed';
+                case 'auth/weak-password':
+                    return 'Password is too weak';
+                case 'auth/user-disabled':
+                    return 'This account has been disabled';
+                case 'auth/user-not-found':
+                    return 'No account found with this email';
+                case 'auth/wrong-password':
+                    return 'Incorrect password';
+                case 'auth/invalid-credential':
+                    return 'Invalid email or password';
+                default:
+                    return 'An error occurred. Please try again';
+            }
+        }
+
+        // Make functions available globally
+        window.signUp = signUp;
+        window.signIn = signIn;
+        window.logout = logout;
+        window.startSearch = startSearch;
+        window.showSignUp = showSignUp;
+        window.showSignIn = showSignIn;
+        window.closeModal = closeModal;
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Enter key handlers
+        document.getElementById('loginPassword').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') signIn();
+        });
+
+        document.getElementById('signupPasswordConfirm').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') signUp();
+        });
+
+        // Initialize IP detection
+        getUserIP();
+    </script>
+</body>
+</html>
